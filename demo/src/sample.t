@@ -21,29 +21,70 @@
 
 #include "actorActionMessages.h"
 
-versionInfo: GameID
-        name = 'actorActionMessages Library Demo Game'
-        byline = 'Diegesis & Mimesis'
-        desc = 'Demo game for the actorActionMessages library. '
-        version = '1.0'
-        IFID = '12345'
-	showAbout() {
-		"This is a simple test game that demonstrates the features
-		of the actorActionMessages library.
-		<.p>
-		Consult the README.txt document distributed with the library
-		source for a quick summary of how to use the library in your
-		own games.
-		<.p>
-		The library source is also extensively commented in a way
-		intended to make it as readable as possible. ";
-	}
-;
-gameMain: GameMainDef
-	initialPlayerChar = me
-	inlineCommand(cmd) { "<b>&gt;<<toString(cmd).toUpper()>></b>"; }
-	printCommand(cmd) { "<.p>\n\t<<inlineCommand(cmd)>><.p> "; }
+versionInfo: GameID;
+gameMain: GameMainDef initialPlayerChar = me;
+
+modify npcActionMessages
+	pebbleCheck = '{You/he} casually glances at the pebble. '
 ;
 
-startRoom: Room 'Void' "This is a featureless void.";
+class PebbleAgenda: AgendaItem
+	agendaOrder = 99
+	initiallyActive = true
+	isReady() { return(pebble.location == getActor().location); }
+	invokeItem() {
+		if(rand(100) > 25) {
+			mainReport(&pebbleCheck);
+			return;
+		}
+		newActorAction(getActor(), Take, pebble);
+	}
+;
+
+startRoom: Room 'Void'
+	"This is a featureless void."
+	pebbleCounter = 0
+	roomDaemon() {
+		pebbleCheck();
+	}
+	pebbleCheck() {
+		if(pebble.location == self)
+			return;
+		pebbleCounter += 1;
+		if(pebbleCounter > 3)
+			pebbleReset();
+	}
+	pebbleReset() {
+		local holder;
+
+		if((holder = pebble.getCarryingActor()) == nil)
+			return;
+
+		gMessageParams(holder);
+		mainReport('The room daemon moves <<pebble.theName>>
+			from {the\'s holder/her} inventory and into
+			the room. ');
+
+		pebble.moveInto(self);
+		pebbleCounter = 0;
+	}
+;
 +me: Person;
++pebble: Thing '(small) (round) pebble' 'pebble' "A small, round pebble. ";
++alice: Person 'Alice' 'Alice'
+	"She looks like the first person you'd turn to in a problem. "
+	isProperName = true
+	isHer = true
+;
+++NPCActionMessages
+	okayTakeMsg = '{You/he} carefully take{s} {the dobj/him}. '
+	pebbleCheck = '{You/he} eye{s} the pebble, but take{s} no action. '
+;
+++PebbleAgenda;
+
++bob: Person 'Bob' 'Bob'
+	"He looks like a Robert, only shorter. "
+	isProperName = true
+	isHim = true
+;
+++PebbleAgenda;
