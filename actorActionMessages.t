@@ -39,6 +39,26 @@
 //	In this case, whenever Alice TAKEs an object, instead of the default
 //	"Alice takes the pebble.", you'd get "Alice carefully takes the pebble."
 //
+//	Alternately, you can add an ActorActionMessages object to an
+//	ActorState instead of an Actor.  The message object will then only
+//	be used when the actor is in that state.
+//
+//
+// TRAVEL MESSAGES
+//
+//	The module also provides the ability to define per-actor/actor state
+//	travel messages by declaring them on a ActorActionMessages object.
+//
+//	Note that adv3 already supports per-actor and per-state travel
+//	messages by default:  travel messages defined on an Actor or ActorState
+//	instance are automatically used in preference to the defaults
+//	in libMessages.  The ability to also define travel messages in
+//	an ActorActionMessages object is intended to make it easier to
+//	keep all of an actor's message customizations in a single place.
+//
+//	The usage for each message is identical to that on the Actor object
+//	itself (in adv3/actor.t in the adv3 source).
+//
 //
 //
 #include <adv3.h>
