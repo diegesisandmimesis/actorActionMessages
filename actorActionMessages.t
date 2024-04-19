@@ -44,6 +44,8 @@
 #include <adv3.h>
 #include <en_us.h>
 
+#include "actorActionMessages.h"
+
 // Module ID for the library
 actorActionMessagesModuleID: ModuleID {
         name = 'Actor Action Messages Library'
@@ -71,6 +73,35 @@ modify Actor
 	}
 
 	getActionMessageObj() {
+		local st;
+
+		if(actorActionMessageObj != nil)
+			return(actorActionMessageObj);
+		if(curState != nil) {
+			if((st = curState.getActionMessageObj()) != nil)
+				return(st);
+		}
+		return(inherited());
+	}
+
+	// Returns true if the actor's action message object has
+	// the given property.
+	actionMessageObjHasMessage(prop) {
+		return(getActionMessageObj().hasMessage(prop));
+	}
+;
+
+modify ActorState
+	actorActionMessageObj = nil
+
+	addActorActionMessages(obj) {
+		if((obj == nil) || !obj.ofKind(ActorActionMessages))
+			return(nil);
+		actorActionMessageObj = obj;
+		return(true);
+	}
+
+	getActionMessageObj() {
 		if(actorActionMessageObj != nil)
 			return(actorActionMessageObj);
 		return(inherited());
@@ -81,9 +112,18 @@ modify Actor
 // replacing EVERY action message for the actor.
 class ActorActionMessages: MessageHelper
 	initializeActorActionMessages() {
-		if((location == nil) || !location.ofKind(Actor))
+		if(location == nil)
+			return;
+		if(!location.ofKind(Actor) && !location.ofKind(ActorState))
 			return;
 		location.addActorActionMessages(self);
+	}
+
+	// Returns true if the message object has the given property
+	// defined.
+	hasMessage(prop) {
+		return(self.propDefined(prop, PropDefDirectly)
+			&& (propType(prop) != TypeNil));
 	}
 ;
 
@@ -92,3 +132,36 @@ class PlayerActionMessages: ActorActionMessages, playerActionMessages;
 
 // For NPCs.
 class NPCActionMessages: ActorActionMessages, npcActionMessages;
+
+#ifndef ACTOR_ACTION_MESSAGES_TRAVEL
+
+modify Actor
+	sayArriving([args]) { sayTravelMessage(&sayArriving, args...); }
+	sayDeparting([args]) { sayTravelMessage(&sayDeparting, args...); }
+	sayArrivingLocally([args])
+		{ sayTravelMessage(&sayArrivingLocally, args...); }
+	sayDepartingLocally([args])
+		{ sayTravelMessage(&sayDepartingLocally, args...); }
+	sayTravelingRemotely([args])
+		{ sayTravelMessage(&sayTravelingRemotely, args...); }
+	sayArrivingDir([args]) { sayTravelMessage(&sayArrivingDir, args...); }
+	sayDepartingDir([args]) { sayTravelMessage(&sayDepartingDir, args...); }
+	sayArrivingThroughPassage([args])
+		{ sayTravelMessage(&sayArrivingThroughPassage, args...); }
+	sayDepartingThroughPassage([args])
+		{ sayTravelMessage(&sayDepartingThroughPassage, args...); }
+	sayArrivingViaPath([args])
+		{ sayTravelMessage(&sayArrivingViaPath, args...); }
+	sayDepartingViaPath([args])
+		{ sayTravelMessage(&sayDepartingViaPath, args...); }
+	sayArrivingUpStairs([args])
+		{ sayTravelMessage(&sayArrivingUpStairs, args...); }
+	sayArrivingDownStairs([args])
+		{ sayTravelMessage(&sayArrivingDownStairs, args...); }
+	sayDepartingUpStairs([args])
+		{ sayTravelMessage(&sayDepartingUpStairs, args...); }
+	sayDepartingDownStairs([args])
+		{ sayTravelMessage(&sayDepartingDownStairs, args...); }
+;
+
+#endif // ACTOR_ACTION_MESSAGES_TRAVEL
