@@ -98,12 +98,12 @@ modify Actor
 	getActionMessageObj() {
 		local st;
 
-		if(actorActionMessageObj != nil)
-			return(actorActionMessageObj);
 		if(curState != nil) {
 			if((st = curState.getActionMessageObj()) != nil)
 				return(st);
 		}
+		if(actorActionMessageObj != nil)
+			return(actorActionMessageObj);
 
 		return(inherited());
 	}
@@ -111,13 +111,12 @@ modify Actor
 	getParserMessageObj() {
 		local st;
 
-		if(actorParserMessageObj != nil)
-			return(actorParserMessageObj);
-
 		if(curState != nil) {
 			if((st = curState.getParserMessageObj()) != nil)
 				return(st);
 		}
+		if(actorParserMessageObj != nil)
+			return(actorParserMessageObj);
 
 		return(inherited());
 	}
