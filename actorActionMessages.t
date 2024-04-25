@@ -88,7 +88,10 @@ modify Actor
 	addActorActionMessages(obj) {
 		if((obj == nil) || !obj.ofKind(ActorActionMessages))
 			return(nil);
-		actorActionMessageObj = obj;
+		if(obj.ofKind(ActorParserMessages))
+			actorParserMessageObj = obj;
+		else
+			actorActionMessageObj = obj;
 		return(true);
 	}
 
@@ -101,6 +104,21 @@ modify Actor
 			if((st = curState.getActionMessageObj()) != nil)
 				return(st);
 		}
+
+		return(inherited());
+	}
+
+	getParserMessageObj() {
+		local st;
+
+		if(actorParserMessageObj != nil)
+			return(actorParserMessageObj);
+
+		if(curState != nil) {
+			if((st = curState.getParserMessageObj()) != nil)
+				return(st);
+		}
+
 		return(inherited());
 	}
 
@@ -113,17 +131,34 @@ modify Actor
 
 modify ActorState
 	actorActionMessageObj = nil
+	actorParserMessageObj = nil
 
 	addActorActionMessages(obj) {
 		if((obj == nil) || !obj.ofKind(ActorActionMessages))
 			return(nil);
-		actorActionMessageObj = obj;
+		if(obj.ofKind(ActorParserMessages))
+			actorParserMessageObj = obj;
+		else
+			actorActionMessageObj = obj;
+		return(true);
+	}
+
+	addActorParserMessages(obj) {
+		if((obj == nil) || !obj.ofKind(ActorParserMessages))
+			return(nil);
+		actorParserMessageObj = obj;
 		return(true);
 	}
 
 	getActionMessageObj() {
 		if(actorActionMessageObj != nil)
 			return(actorActionMessageObj);
+		return(inherited());
+	}
+
+	getParserMessageObj() {
+		if(actorParserMessageObj != nil)
+			return(actorParserMessageObj);
 		return(inherited());
 	}
 ;
@@ -147,11 +182,15 @@ class ActorActionMessages: MessageHelper
 	}
 ;
 
+class ActorParserMessages: ActorActionMessages;
+
 // For player characters.
 class PlayerActionMessages: ActorActionMessages, playerActionMessages;
+class PlayerParserMessages: ActorParserMessages, playerMessages;
 
 // For NPCs.
 class NPCActionMessages: ActorActionMessages, npcActionMessages;
+class NPCParserMessages: ActorParserMessages, playerMessages;
 
 #ifndef ACTOR_ACTION_MESSAGES_TRAVEL
 
